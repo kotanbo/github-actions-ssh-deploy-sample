@@ -30,7 +30,7 @@ jobs:
           tag_name: v${{ github.run_number }}
           name: Release ${{ github.run_number }}
           generate_release_notes: true
-          files: $BUILD_ZIP
+          files: ${{ env.BUILD_ZIP }}
 
       - name: Copy file to VPS
         uses: appleboy/scp-action@v1
@@ -38,7 +38,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: $BUILD_ZIP
+          source: ${{ env.BUILD_ZIP }} 
           target: "/home/deploy/build/"
 
       - name: Deploy to VPS
