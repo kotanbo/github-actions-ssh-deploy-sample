@@ -47,6 +47,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          envs: BUILD_ZIP
           script: |
             cd /home/deploy/build
             # バックアップ
