@@ -56,4 +56,4 @@ jobs:
             fi
             # 新しいビルドを展開
             unzip $BUILD_ZIP -d myapp
-            rm myapp-v${{ github.run_number }}.zip
+            rm $BUILD_ZIP
