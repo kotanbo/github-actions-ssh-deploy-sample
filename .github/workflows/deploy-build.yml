@@ -15,6 +15,7 @@ jobs:
     env:
       BUILD_ZIP: v${{ github.run_number }}.zip
       RELEASE_DIR: /home/deploy/build/releases
+      # 実ディレクトリではなく、シンボリックリンクで作成
       APP_DIR: /home/deploy/build/app
 
     steps:
@@ -63,7 +64,7 @@ jobs:
             # -s: シンボリックリンクを作成
             # -f: リンク先が既に存在する場合、強制的に上書き
             # -n: リンク先がディレクトリの場合に、その中ではなくリンク自体を置き換える
-            ln -sfn ${{ env.RELEASE_DIR }}/${{ github.run_number }} ${{ env.APP_DIR }}    
+            ln -sfn ${{ env.RELEASE_DIR }}/${{ github.run_number }} ${{ env.APP_DIR }}
 
             # --- 古いリリースを 5 世代分だけ残して削除 ---
             ls -dt ${{ env.RELEASE_DIR }}/*/ | tail -n +6 | xargs -r rm -rf
