@@ -14,6 +14,8 @@ jobs:
     environment: production
     env:
       BUILD_ZIP: v${{ github.run_number }}.zip
+      RELEASE_DIR: /home/deploy/build/releases
+      APP_DIR: /home/deploy/build/app
 
     steps:
       - name: Checkout repository
@@ -39,9 +41,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: ${{ env.BUILD_ZIP }} 
-          target: "/home/deploy/build/"
+          target: ${{ env.RELEASE_DIR }}
 
-      - name: Deploy to VPS
+      - name: Activate new release
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -49,12 +51,19 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           envs: BUILD_ZIP
           script: |
-            cd /home/deploy/build
-            # バックアップ
-            if [ -d myapp ]; then
-              cp -r myapp myapp_backup_$(date +%Y%m%d%H%M%S)
-              rm -rf myapp
-            fi
-            # 新しいビルドを展開
-            unzip $BUILD_ZIP -d myapp
-            rm $BUILD_ZIP
+            set -e # エラー時にスクリプト停止
+
+            # --- 新しいリリースを展開 ---
+            cd ${{ env.RELEASE_DIR }}
+            unzip -q ${{ env.BUILD_ZIP }} -d ${{ github.run_number }}
+            rm ${{ env.BUILD_ZIP }}
+
+            # --- シンボリックリンクを切り替えてリリースを有効化 ---
+            # ln -sfn <source> <link_name>
+            # -s: シンボリックリンクを作成
+            # -f: リンク先が既に存在する場合、強制的に上書き
+            # -n: リンク先がディレクトリの場合に、その中ではなくリンク自体を置き換える
+            ln -sfn ${{ env.RELEASE_DIR }}/${{ github.run_number }} ${{ env.APP_DIR }}    
+
+            # --- 古いリリースを 5 世代分だけ残して削除 ---
+            ls -dt ${{ env.RELEASE_DIR }}/*/ | tail -n +6 | xargs -r rm -rf
