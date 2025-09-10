@@ -67,4 +67,9 @@ jobs:
             ln -sfn ${{ env.RELEASE_DIR }}/${{ github.run_number }} ${{ env.APP_DIR }}
 
             # --- 古いリリースを 5 世代分だけ残して削除 ---
-            ls -dt ${{ env.RELEASE_DIR }}/*/ | tail -n +6 | xargs -r rm -rf
+            targets=$(ls -dt ${{ env.RELEASE_DIR }}/*/ | tail -n +6)
+            if [ -n "$targets" ]; then
+                echo "削除対象:"
+                ls -ldh $targets
+                rm -rf $targets
+            fi
